@@ -1,0 +1,23 @@
+---
+version: 2.1
+
+description: |
+  Feedyard common-pipeline-tasks is an example set of shared commands and jobs that team(s)
+  would use to standardize basic team practices or conventions.
+  Orb source code - https://github.com/feedyard/circleci-orbs/blob/master/src/common-pipeline-tasks/orb.yaml
+
+orbs:
+  orb-tools: feedyard/orb-tools@1.0.0
+
+# yaml anchor filters
+dev-release-filter: &dev-release-filter
+  branches:
+    only: /master/
+  tags:
+    ignore: /.*/
+
+version-publish-filter: &version-publish-filter
+  branches:
+    ignore: /.*/
+  tags:
+    only: /.*/

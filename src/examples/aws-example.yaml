@@ -1,0 +1,15 @@
+description: >
+  Assumes access key and secret are available in the environment variables
+
+usage:
+  version: 2.1
+
+  orbs:
+    common-tasks: feedyard/common-pipeline-tasks@1.0.0
+
+  workflows:
+    pipeline:
+      jobs:
+        - common-tasks/setup-aws-credentials:
+            aws-role: arn:aws:iam::999999999999:role/RoleToAssume
+            aws-region: us-east-1

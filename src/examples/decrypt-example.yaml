@@ -1,0 +1,49 @@
+description: >
+  A public/private rsa key is created for use by the pipeline in working with encrypted files. Encoded files are
+  encrypted using openssl enc and a sufficient long random key. This random key is then encrypted with the pipeline's
+  public key and stored in the repo alongside the encrypted file. During pipeline execution, the pipeline will use the
+  private key to decrypt the stored encryption key and then use this to decrypt encoded files. Sha256sum should be
+  included for encrypted files and will be checked by the orb logic.
+
+  Put the filename or a common .extension into .gitignore so the the plaintext contents of the files to be encoded is
+  never added to the repository. This orb makes use of the assumed convention that decoded files intended to be kept
+  secure will have the extension .bin and once encoded will gain the addition extension .enc, as in filename.bin.enc -
+  Similarly, the local random encryption key will be named key.bin and the version encrypted with the public key will
+  be key.bin.enc - You could easily adapt this example to a different convention or modify to require explicit passing
+  of key and filenames.
+
+  The following tasks.py can be added locally to make working with these keys easier.
+
+  ```python
+    from invoke import task
+
+    # the public key for the piipeline, used to encode encryption keys
+    PIPELINE_PRIVATE_PEM='~/.circleci/public/pipeline-public.pem'
+
+    @task
+    def enckey(ctx):
+      """generate random 2048bit random key to use for encrypting secure files for this pipeline"""
+        ctx.run('openssl rand -base64 32 > key.bin')
+        ctx.run('openssl rsautl -encrypt -inkey {} -pubin -in key.bin -out key.bin.enc'.format(PIPELINE_PRIVATE_PEM))
+        ctx.run('sha256sum key.bin.enc > key.bin.enc.sha')
+
+    @task
+    def encfile(ctx, decoded):
+        """encrypt file using local encryption key"""
+        ctx.run('openssl enc -aes-256-cbc -salt -in {0} -out {0}.enc -pass file:./key.bin'.format(decoded))
+        ctx.run('sha256sum {0}.enc > {0}.enc.sha'.format(decoded))
+  ```
+
+usage:
+  version: 2.1
+
+  orbs:
+    common-tasks: feedyard/common-pipeline-tasks@1.0.0
+
+  workflows:
+    pipeline:
+      jobs:
+        - common-tasks/decrypt-file:
+            private-key:  PIPELINE_PRIVATE_PEM   # perhaps pulled from Vault
+            stored-key:   filename.bin
+            decoded-file: filename.bin
