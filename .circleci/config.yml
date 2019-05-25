@@ -23,7 +23,7 @@ workflows:
             - orb-tools/validate
 
       - approve-release:
-          type: approve
+          type: approval
           requires:
             - orb-tools/publish-dev
 
