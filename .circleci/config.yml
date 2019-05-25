@@ -10,56 +10,56 @@ workflows:
       - orb-tools/lint:
           filters: &dev-release-filter
 
-      - orb-tools/validate:
-          filters: &dev-release-filter
-          requires:
-            - orb-tools/lint
-
-      - orb-tools/publish-dev:
-          context: orb-publishing
-          orb-name: feedyard/common-pipeline-tasks
-          filters: &dev-release-filter
-          requires:
-            - orb-tools/validate
-
-      - approve-release:
-          type: approval
-          requires:
-            - orb-tools/publish-dev
-
-      - orb-tools/release-tag:
-          context: orb-publishing
-          ssh-fingerprints: $CI_FINGERPRINT
-          filters: &dev-release-filter
-          requires:
-            - approve-release
-
-      # patch, minor, or major publishing, depending on which orb source
-      # files have been modified (that logic lives in the
-      # release-tag job's source)
-      - orb-tools/promote-dev-to-prod:
-          name: patch-release
-          context: orb-publishing
-          release: patch
-          orb-name: feedyard/common-pipeline-tasks
-          requires:
-            - orb-tools/release-tag
-          filters: &patch-tag-publish-filter
-
-      - orb-tools/promote-dev-to-prod:
-          name: minor-release
-          context: orb-publishing
-          release: minor
-          orb-name: feedyard/common-pipeline-tasks
-          requires:
-            - orb-tools/release-tag
-          filters: &minor-tag-publish-filter
-
-      - orb-tools/promote-dev-to-prod:
-          name: major-release
-          context: orb-publishing
-          release: major
-          orb-name: feedyard/common-pipeline-tasks
-          requires:
-            - orb-tools/release-tag
-          filters: &major-tag-publish-filter
+#      - orb-tools/validate:
+#          filters: &dev-release-filter
+#          requires:
+#            - orb-tools/lint
+#
+#      - orb-tools/publish-dev:
+#          context: orb-publishing
+#          orb-name: feedyard/common-pipeline-tasks
+#          filters: &dev-release-filter
+#          requires:
+#            - orb-tools/validate
+#
+#      - approve-release:
+#          type: approval
+#          requires:
+#            - orb-tools/publish-dev
+#
+#      - orb-tools/release-tag:
+#          context: orb-publishing
+#          ssh-fingerprints: $CI_FINGERPRINT
+#          filters: &dev-release-filter
+#          requires:
+#            - approve-release
+#
+#      # patch, minor, or major publishing, depending on which orb source
+#      # files have been modified (that logic lives in the
+#      # release-tag job's source)
+#      - orb-tools/promote-dev-to-prod:
+#          name: patch-release
+#          context: orb-publishing
+#          release: patch
+#          orb-name: feedyard/common-pipeline-tasks
+#          requires:
+#            - orb-tools/release-tag
+#          filters: &patch-tag-publish-filter
+#
+#      - orb-tools/promote-dev-to-prod:
+#          name: minor-release
+#          context: orb-publishing
+#          release: minor
+#          orb-name: feedyard/common-pipeline-tasks
+#          requires:
+#            - orb-tools/release-tag
+#          filters: &minor-tag-publish-filter
+#
+#      - orb-tools/promote-dev-to-prod:
+#          name: major-release
+#          context: orb-publishing
+#          release: major
+#          orb-name: feedyard/common-pipeline-tasks
+#          requires:
+#            - orb-tools/release-tag
+#          filters: &major-tag-publish-filter
