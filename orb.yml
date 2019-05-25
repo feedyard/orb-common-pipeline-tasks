@@ -1,0 +1,149 @@
+commands:
+  decrypt-file:
+    description: |
+      Use this command to decrypt a local file using openssl aes-256-cbc key encryption. A typical use case would be in maintaining secure information in a code repository for use in a ci/cd pipeline. See examples for use.
+    parameters:
+      encoded-file:
+        description: filename of encoded file to be decrypted
+        type: string
+      private-pem:
+        default: PIPELINE_PRIVATE_PEM
+        description: public key of the rsa used by a pipeline for managing encrypted
+          information stored in a repo
+        type: env_var_name
+      stored-key:
+        default: key.bin
+        description: |
+          filename of the file containing the key used to encrypt the encoded file. This key value was encrypted using the public key of the rsa used by a pipeline for managing encrypted information stored in a repo.
+        type: string
+    steps:
+    - run:
+        command: |
+          sha256sum --check --status << parameters.stored-key >>.enc.sha
+          sha256sum --check --status << parameters.encoded-file >>.enc.sha
+        name: check sha256sum for encoded key and encoded file
+    - run:
+        command: openssl rsautl -decrypt -inkey << parameters.private-pem >> -in <<
+          parameters.stored-key >>.enc -out << parameters.stored-key >>
+        name: decode local encryption key using pipeline private.pem
+    - run:
+        command: openssl enc -d -aes-256-cbc -in << parameters.encoded-file >>.enc
+          -out << parameters.encoded-file >> -pass file:./<< parameters.stored-key
+          >>
+        name: decode local file using local encryption key
+  setup-aws-credentials:
+    description: Setup default ~/.aws style credentials
+    parameters:
+      aws-access-key-id:
+        default: AWS_ACCESS_KEY_ID
+        description: aws access key id
+        type: env_var_name
+      aws-region:
+        default: ""
+        description: default aws region
+        type: string
+      aws-role:
+        default: ""
+        description: assume aws role
+        type: string
+      aws-secret-access-key:
+        default: AWS_SECRET_ACCESS_KEY
+        description: aws secret access key
+        type: env_var_name
+    steps:
+    - when:
+        condition: << parameters.aws-role >>
+        steps:
+        - run:
+            command: |
+              set -euo pipefail
+              TMP="$(aws sts assume-role --output json --role-arn << parameters.aws-role >> --role-session-name $CIRCLE_PROJECT_REPONAME || { echo 'sts failure!' ; exit 1; })"
+              ACCESS_KEY_ID=$(echo $TMP | jq -r ".Credentials.AccessKeyId")
+              SECRET_ACCESS_KEY=$(echo $TMP | jq -r ".Credentials.SecretAccessKey")
+              SESSION_TOKEN=$(echo $TMP | jq -r ".Credentials.SessionToken")
+              mkdir -p ~/.aws
+              echo "[default]" > ~/.aws/credentials
+              echo "aws_access_key_id=$ACCESS_KEY_ID" >>  ~/.aws/credentials
+              echo "aws_secret_access_key=$SECRET_ACCESS_KEY" >>  ~/.aws/credentials
+              echo "aws_session_token=$SESSION_TOKEN" >>  ~/.aws/credentials
+              echo "region=<< parameters.aws-region >>" >>  ~/.aws/credentials
+            name: setup assumed-role ~/.aws credentials
+    - unless:
+        condition: << parameters.aws-role >>
+        steps:
+        - run:
+            command: |
+              set -euo pipefail
+              mkdir -p ~/.aws
+              echo "[default]" > ~/.aws/credentials
+              echo "aws_access_key_id=<< parameters.aws-access-key-id >>" >>  ~/.aws/credentials
+              echo "aws_secret_access_key=<< parameters.aws-secret-access-key >>" >>  ~/.aws/credentials
+              echo "region=<< parameters.aws-region >>" >>  ~/.aws/credentials
+            name: setup standard ~/.aws credentials
+description: |
+  Feedyard common-pipeline-tasks is an example set of shared commands and jobs that team(s)
+  would use to standardize basic team practices or conventions.
+  Orb source code - https://github.com/feedyard/circleci-orbs/blob/master/src/common-pipeline-tasks/orb.yaml
+dev-release-filter:
+  branches:
+    only: /master/
+  tags:
+    ignore: /.*/
+examples:
+  aws-example:
+    description: |
+      Assumes access key and secret are available in the environment variables
+    usage:
+      orbs:
+        common-tasks: feedyard/common-pipeline-tasks@1.0.0
+      version: 2.1
+      workflows:
+        pipeline:
+          jobs:
+          - common-tasks/setup-aws-credentials:
+              aws-region: us-east-1
+              aws-role: arn:aws:iam::999999999999:role/RoleToAssume
+  decrypt-example:
+    description: |
+      A public/private rsa key is created for use by the pipeline in working with encrypted files. Encoded files are encrypted using openssl enc and a sufficient long random key. This random key is then encrypted with the pipeline's public key and stored in the repo alongside the encrypted file. During pipeline execution, the pipeline will use the private key to decrypt the stored encryption key and then use this to decrypt encoded files. Sha256sum should be included for encrypted files and will be checked by the orb logic.
+      Put the filename or a common .extension into .gitignore so the the plaintext contents of the files to be encoded is never added to the repository. This orb makes use of the assumed convention that decoded files intended to be kept secure will have the extension .bin and once encoded will gain the addition extension .enc, as in filename.bin.enc - Similarly, the local random encryption key will be named key.bin and the version encrypted with the public key will be key.bin.enc - You could easily adapt this example to a different convention or modify to require explicit passing of key and filenames.
+      The following tasks.py can be added locally to make working with these keys easier.
+      ```python
+        from invoke import task
+
+        # the public key for the piipeline, used to encode encryption keys
+        PIPELINE_PRIVATE_PEM='~/.circleci/public/pipeline-public.pem'
+
+        @task
+        def enckey(ctx):
+          """generate random 2048bit random key to use for encrypting secure files for this pipeline"""
+            ctx.run('openssl rand -base64 32 > key.bin')
+            ctx.run('openssl rsautl -encrypt -inkey {} -pubin -in key.bin -out key.bin.enc'.format(PIPELINE_PRIVATE_PEM))
+            ctx.run('sha256sum key.bin.enc > key.bin.enc.sha')
+
+        @task
+        def encfile(ctx, decoded):
+            """encrypt file using local encryption key"""
+            ctx.run('openssl enc -aes-256-cbc -salt -in {0} -out {0}.enc -pass file:./key.bin'.format(decoded))
+            ctx.run('sha256sum {0}.enc > {0}.enc.sha'.format(decoded))
+      ```
+    usage:
+      orbs:
+        common-tasks: feedyard/common-pipeline-tasks@1.0.0
+      version: 2.1
+      workflows:
+        pipeline:
+          jobs:
+          - common-tasks/decrypt-file:
+              decoded-file: filename.bin
+              private-key: PIPELINE_PRIVATE_PEM
+              stored-key: filename.bin
+orbs:
+  orb-tools: feedyard/orb-tools@1.0.0
+version: 2.1
+version-publish-filter:
+  branches:
+    ignore: /.*/
+  tags:
+    only: /.*/
+

@@ -7,7 +7,7 @@ description: |
   Orb source code - https://github.com/feedyard/circleci-orbs/blob/master/src/common-pipeline-tasks/orb.yaml
 
 orbs:
-  orb-tools: feedyard/orb-tools@1.0.0
+  orb-tools: feedyard/orb-tools@dev:latest
 
 # yaml anchor filters
 dev-release-filter: &dev-release-filter
