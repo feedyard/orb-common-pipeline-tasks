@@ -4,6 +4,13 @@ version: 2.1
 orbs:
   orb-tools: feedyard/orb-tools@dev:latest
 
+# yaml anchors
+dev-release-filter: &dev-release-filter
+  branches:
+    only: /master/
+  tags:
+    ignore: /.*/
+
 workflows:
   dev-release:
     jobs:
@@ -64,10 +71,3 @@ workflows:
 #          requires:
 #            - orb-tools/release-tag
 #          filters: &major-tag-publish-filter
-
-# yaml anchors
-dev-release-filter: &dev-release-filter
-  branches:
-    only: /master/
-  tags:
-    ignore: /.*/
