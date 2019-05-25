@@ -7,8 +7,12 @@ orbs:
 workflows:
   dev-release:
     jobs:
-#      - orb-tools/lint:
-#          filters: &dev-release-filter
+      - orb-tools/lint:
+          filters:
+            branches:
+              only: /master/
+            tags:
+              ignore: /.*/
 
 #      - orb-tools/validate:
 #          filters: &dev-release-filter
@@ -22,8 +26,8 @@ workflows:
 #          requires:
 #            - orb-tools/validate
 #
-      - approve-release:
-          type: approval
+#      - approve-release:
+#          type: approval
 #          requires:
 #            - orb-tools/publish-dev
 
