@@ -8,11 +8,7 @@ workflows:
   dev-release:
     jobs:
       - orb-tools/lint:
-          filters:
-            branches:
-              only: /master/
-            tags:
-              ignore: /.*/
+          filters: *dev-release-filter
 
 #      - orb-tools/validate:
 #          filters: &dev-release-filter
@@ -67,3 +63,9 @@ workflows:
 #          requires:
 #            - orb-tools/release-tag
 #          filters: &major-tag-publish-filter
+#
+#dev-release-filter: &dev-release-filter
+#  branches:
+#    only: /master/
+#  tags:
+#    ignore: /.*/
