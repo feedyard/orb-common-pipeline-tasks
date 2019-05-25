@@ -1,8 +1,8 @@
 # orb-common-pipeline-tasks
 Set of common pipeline tasks  
 
-* decrypt local files using openssl aes-256-cbc key encryption  
-* setup aws credentials  
+* decrypt local files using openssl aes-256-cbc key encryption
+* setup aws credentials
 
 See orb registry help and examples pages for use descriptions  
 
