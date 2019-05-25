@@ -35,13 +35,13 @@ workflows:
           requires:
             - orb-tools/publish-dev
 
-#      - orb-tools/release-tag:
-#          context: orb-publishing
-#          ssh-fingerprints: $CI_FINGERPRINT
-#          filters: &dev-release-filter
-#          requires:
-#            - approve-release
-#
+      - orb-tools/release-tag:
+          context: orb-publishing
+          ssh-fingerprints: $CI_FINGERPRINT
+          filters: *dev-release-filter
+          requires:
+            - approve-release
+
 #      # patch, minor, or major publishing, depending on which orb source
 #      # files have been modified (that logic lives in the
 #      # release-tag job's source)
