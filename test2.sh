@@ -6,7 +6,7 @@ COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | sed 's:^.*/compare/::g')
 echo "Commit range: $COMMIT_RANGE"
 
 # only publish a major release if there are new jobs or commands
-if ( git diff $COMMIT_RANGE --name-status | grep -e "A      src/commands" -e "A      src/jobs" ); then
+if ( git diff $COMMIT_RANGE --name-status | grep -e "M\tsrc/commands" -e "A\tsrc/jobs" ); then
 export INTEGRATION_TAG=major
 # publish a minor release if there are other changes to jobs or commands
 elif ( git diff $COMMIT_RANGE --name-status | grep -e "src/commands" -e "src/jobs" ); then
