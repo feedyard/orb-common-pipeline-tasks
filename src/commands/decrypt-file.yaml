@@ -29,7 +29,14 @@ steps:
         sha256sum --check --status << parameters.encoded-file >>.enc.sha
   - run:
       name: decode local encryption key using pipeline private.pem
-      command: openssl rsautl -decrypt -inkey << parameters.private-pem >> -in << parameters.stored-key >>.enc -out << parameters.stored-key >>
+      command: |
+        openssl rsautl -decrypt -inkey << parameters.private-pem >> \
+                -in << parameters.stored-key >>.enc \
+                -out << parameters.stored-key >>
   - run:
       name: decode local file using local encryption key
-      command: openssl enc -d -aes-256-cbc -in << parameters.encoded-file >>.enc -out << parameters.encoded-file >> -pass file:./<< parameters.stored-key >>
+      command: |
+        openssl enc -d -aes-256-cbc \
+                -in << parameters.encoded-file >>.enc \
+                -out << parameters.encoded-file >> \
+                -pass file:./<< parameters.stored-key >>
