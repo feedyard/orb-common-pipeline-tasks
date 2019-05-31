@@ -61,32 +61,35 @@ workflows:
           requires:
             - approve-release
 
-#      # patch, minor, or major publishing, depending on which orb source
-#      # files have been modified (that logic lives in the
-#      # release-tag job's source)
-#      - orb-tools/promote-dev-to-prod:
-#          name: patch-release
-#          context: orb-publishing
-#          release: patch
-#          orb-name: feedyard/common-pipeline-tasks
-#          requires:
-#            - orb-tools/release-tag
-#          filters: &patch-tag-publish-filter
-#
-#      - orb-tools/promote-dev-to-prod:
-#          name: minor-release
-#          context: orb-publishing
-#          release: minor
-#          orb-name: feedyard/common-pipeline-tasks
-#          requires:
-#            - orb-tools/release-tag
-#          filters: &minor-tag-publish-filter
-#
-#      - orb-tools/promote-dev-to-prod:
-#          name: major-release
-#          context: orb-publishing
-#          release: major
-#          orb-name: feedyard/common-pipeline-tasks
-#          requires:
-#            - orb-tools/release-tag
-#          filters: &major-tag-publish-filter
+      # patch, minor, or major publishing, depending on which orb source
+      # files have been modified (that logic lives in the
+      # release-tag job's source)
+      - orb-tools/promote-dev-to-prod:
+          name: patch-release
+          context: orb-publishing
+          release: patch
+          orb-name: feedyard/common-pipeline-tasks
+          ssh-fingerprints: $CI_FINGERPRINT
+          requires:
+            - orb-tools/release-tag
+          filters: *patch-tag-publish-filter
+
+      - orb-tools/promote-dev-to-prod:
+          name: minor-release
+          context: orb-publishing
+          release: minor
+          orb-name: feedyard/common-pipeline-tasks
+          ssh-fingerprints: $CI_FINGERPRINT
+          requires:
+            - orb-tools/release-tag
+          filters: *minor-tag-publish-filter
+
+      - orb-tools/promote-dev-to-prod:
+          name: major-release
+          context: orb-publishing
+          release: major
+          orb-name: feedyard/common-pipeline-tasks
+          ssh-fingerprints: $CI_FINGERPRINT
+          requires:
+            - orb-tools/release-tag
+          filters: *major-tag-publish-filter
