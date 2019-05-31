@@ -1,0 +1,55 @@
+# src/commands/setup-aws-credentials.yaml
+
+description: Setup default ~/.aws style credentials
+
+parameters:
+  aws-access-key-id:
+    description: aws access key id
+    type: env_var_name
+    default: AWS_ACCESS_KEY_ID
+
+  aws-secret-access-key:
+    description: aws secret access key
+    type: env_var_name
+    default: AWS_SECRET_ACCESS_KEY
+
+  aws-role:
+    description: assume aws role
+    type: string
+    default: ''
+
+  aws-region:
+    description: default aws region
+    type: string
+    default: ''
+
+steps:
+  - when:
+      condition: << parameters.aws-role >>
+      steps:
+        - run:
+            name: setup assumed-role ~/.aws credentials
+            command: |
+              set -euo pipefail
+              TMP="$(aws sts assume-role --output json --role-arn << parameters.aws-role >> --role-session-name $CIRCLE_PROJECT_REPONAME || { echo 'sts failure!' ; exit 1; })"
+              ACCESS_KEY_ID=$(echo $TMP | jq -r ".Credentials.AccessKeyId")
+              SECRET_ACCESS_KEY=$(echo $TMP | jq -r ".Credentials.SecretAccessKey")
+              SESSION_TOKEN=$(echo $TMP | jq -r ".Credentials.SessionToken")
+              mkdir -p ~/.aws
+              echo "[default]" > ~/.aws/credentials
+              echo "aws_access_key_id=$ACCESS_KEY_ID" >>  ~/.aws/credentials
+              echo "aws_secret_access_key=$SECRET_ACCESS_KEY" >>  ~/.aws/credentials
+              echo "aws_session_token=$SESSION_TOKEN" >>  ~/.aws/credentials
+              echo "region=<< parameters.aws-region >>" >>  ~/.aws/credentials
+  - unless:
+      condition: << parameters.aws-role >>
+      steps:
+        - run:
+            name: setup standard ~/.aws credentials
+            command: |
+              set -euo pipefail
+              mkdir -p ~/.aws
+              echo "[default]" > ~/.aws/credentials
+              echo "aws_access_key_id=<< parameters.aws-access-key-id >>" >>  ~/.aws/credentials
+              echo "aws_secret_access_key=<< parameters.aws-secret-access-key >>" >>  ~/.aws/credentials
+              echo "region=<< parameters.aws-region >>" >>  ~/.aws/credentials
