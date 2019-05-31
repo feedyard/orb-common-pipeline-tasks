@@ -4,12 +4,31 @@ version: 2.1
 orbs:
   orb-tools: feedyard/orb-tools@dev:latest
 
-# yaml anchors
+# yaml anchor filters
 dev-release-filter: &dev-release-filter
   branches:
     only: /master/
   tags:
     ignore: /.*/
+
+patch-tag-publish-filter: &patch-tag-publish-filter
+  branches:
+    ignore: /.*/
+  tags:
+    only: /patch-.*/
+
+minor-tag-publish-filter: &minor-tag-publish-filter
+  branches:
+    ignore: /.*/
+  tags:
+    only: /minor-.*/
+
+major-tag-publish-filter: &major-tag-publish-filter
+  branches:
+    ignore: /.*/
+  tags:
+    only: /major-.*/
+
 
 workflows:
   dev-release:
