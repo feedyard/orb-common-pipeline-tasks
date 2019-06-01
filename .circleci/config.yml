@@ -15,19 +15,19 @@ patch-tag-publish-filter: &patch-tag-publish-filter
   branches:
     ignore: /.*/
   tags:
-    only: /patch.*/
+    only: /patch*/
 
 minor-tag-publish-filter: &minor-tag-publish-filter
   branches:
     ignore: /.*/
   tags:
-    only: /minor.*/
+    only: /minor*/
 
 major-tag-publish-filter: &major-tag-publish-filter
   branches:
     ignore: /.*/
   tags:
-    only: /major.*/
+    only: /major*/
 
 
 workflows:
@@ -53,6 +53,7 @@ workflows:
           type: approval
           requires:
             - orb-tools/publish-dev
+          filters: *dev-release-filter
 
       - orb-tools/release-tag:
           context: orb-publishing
@@ -70,8 +71,6 @@ workflows:
           release: patch
           orb-name: feedyard/common-pipeline-tasks
           ssh-fingerprints: $CI_FINGERPRINT
-          requires:
-            - orb-tools/release-tag
           filters: *patch-tag-publish-filter
 
       - orb-tools/promote-dev-to-prod:
@@ -80,8 +79,6 @@ workflows:
           release: minor
           orb-name: feedyard/common-pipeline-tasks
           ssh-fingerprints: $CI_FINGERPRINT
-          requires:
-            - orb-tools/release-tag
           filters: *minor-tag-publish-filter
 
       - orb-tools/promote-dev-to-prod:
@@ -90,6 +87,4 @@ workflows:
           release: major
           orb-name: feedyard/common-pipeline-tasks
           ssh-fingerprints: $CI_FINGERPRINT
-          requires:
-            - orb-tools/release-tag
           filters: *major-tag-publish-filter
