@@ -62,6 +62,8 @@ workflows:
           requires:
             - approve-release
 
+  promote:
+    jobs:
       # patch, minor, or major publishing, depending on which orb source
       # files have been modified (that logic lives in the
       # release-tag job's source)
