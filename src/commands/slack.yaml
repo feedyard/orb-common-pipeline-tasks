@@ -1,0 +1,34 @@
+# src/commands/slack.yaml
+
+description: Post simple message to slack webhook
+
+parameters:
+
+  message:
+    description: Message to post
+    type: string
+
+  title:
+    description: Optional title
+    type: string
+    default: "slack message from feedyard/common-pipeline-tasks"
+
+  webhook:
+    description: Webhook value
+    type: string
+
+steps:
+  - run:
+      name: Simple slack message
+      command: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data \
+            "{ \
+              \"attachments\": [ \
+                { \
+                  \"fallback\": \"<< parameters.message >>\", \
+                  \"text\": \"<< parameters.message >>\", \
+                  \"title\": \"<< parameters.title >>\", \
+                } \
+              ] \
+            }" << parameters.webhook >>
