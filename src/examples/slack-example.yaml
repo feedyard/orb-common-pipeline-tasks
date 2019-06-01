@@ -1,0 +1,16 @@
+description: >
+  Post a simple slack message to a channel using a supplied webhook url
+
+usage:
+  version: 2.1
+
+  orbs:
+    common-tasks: feedyard/common-pipeline-tasks@0.3.0
+
+  workflows:
+    pipeline:
+      jobs:
+        - common-tasks/slack:
+            title: CircleCi
+            message: Job approval is pending for $CIRCLE_PROJECT_REPONAME
+            webhook: https://hooks.slack.com/services/THX1139/BR549/LOkiWW456h53w123456789

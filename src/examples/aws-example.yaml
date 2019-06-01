@@ -5,7 +5,7 @@ usage:
   version: 2.1
 
   orbs:
-    common-tasks: feedyard/common-pipeline-tasks@1.0.0
+    common-tasks: feedyard/common-pipeline-tasks@0.3.0
 
   workflows:
     pipeline:
