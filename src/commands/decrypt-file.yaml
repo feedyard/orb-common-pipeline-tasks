@@ -2,7 +2,7 @@
 
 description: >
   Use this command to decrypt a local file using openssl aes-256-cbc key encryption. A typical use case would be in
-  maintaining secure information in a code repository for use in a ci/cd pipeline. See examples for use.
+  maintaining secure information in a code repository for use in a ci/cd pipeline. See orb examples for use.
 
 parameters:
   private-pem:
