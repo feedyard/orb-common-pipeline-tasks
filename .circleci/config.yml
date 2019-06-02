@@ -2,7 +2,7 @@
 version: 2.1
 
 orbs:
-  orb-tools: feedyard/orb-tools@dev:latest
+  orb-tools: feedyard/orb-tools@2.0.2
 
 # yaml anchor filters
 dev-release-filter: &dev-release-filter
@@ -57,7 +57,7 @@ workflows:
 
       - orb-tools/release-tag:
           context: orb-publishing
-          ssh-fingerprints: $CI_FINGERPRINT
+          ssh-fingerprints: $SVC_FINGERPRINT
           filters: *dev-release-filter
           requires:
             - approve-release
@@ -72,7 +72,7 @@ workflows:
           context: orb-publishing
           release: patch
           orb-name: feedyard/common-pipeline-tasks
-          ssh-fingerprints: $CI_FINGERPRINT
+          ssh-fingerprints: $SVC_FINGERPRINT
           filters: *patch-tag-publish-filter
 
       - orb-tools/promote-dev-to-prod:
@@ -80,7 +80,7 @@ workflows:
           context: orb-publishing
           release: minor
           orb-name: feedyard/common-pipeline-tasks
-          ssh-fingerprints: $CI_FINGERPRINT
+          ssh-fingerprints: $SVC_FINGERPRINT
           filters: *minor-tag-publish-filter
 
       - orb-tools/promote-dev-to-prod:
@@ -88,5 +88,5 @@ workflows:
           context: orb-publishing
           release: major
           orb-name: feedyard/common-pipeline-tasks
-          ssh-fingerprints: $CI_FINGERPRINT
+          ssh-fingerprints: $SVC_FINGERPRINT
           filters: *major-tag-publish-filter

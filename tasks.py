@@ -19,7 +19,15 @@ def enckey(ctx):
 
 @task
 def decfile(ctx, filename):
+    """decrypt file encryption key with private.pem and decode file using local encryption key"""
     ctx.run('sha256sum --check --status key.bin.enc.sha')
     ctx.run('openssl rsautl -decrypt -inkey {} -in key.bin.enc -out key.bin'.format(PRIVATE_PEM))
     ctx.run('sha256sum --check --status {}.enc.sha'.format(filename))
     ctx.run('openssl enc -d -aes-256-cbc -in {0}.enc -out {0} -pass file:./key.bin'.format(filename))
+
+@task
+def validate(ctx):
+    """validate circleci orb file"""
+    ctx.run('circleci config pack src > orb.yml')
+    ctx.run('circleci orb validate orb.yml')
+    ctx.run('rm orb.yml')
