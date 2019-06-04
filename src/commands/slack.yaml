@@ -15,7 +15,7 @@ parameters:
 
   webhook:
     description: Webhook value
-    type: string
+    type: env_var_name
 
 steps:
   - run:
@@ -31,4 +31,4 @@ steps:
                   \"title\": \"<< parameters.title >>\", \
                 } \
               ] \
-            }" << parameters.webhook >>
+            }" ${<< parameters.webhook >>}
