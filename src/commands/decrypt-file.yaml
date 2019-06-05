@@ -25,7 +25,7 @@ steps:
   - run:
       name: Confirm PIPELINE_PRIVATE_PEM environment variable is configured
       command: |
-        if [ ${<< parameters.private-pem >>-} ]; then
+        if [ ! ${<< parameters.private-pem >>-} ]; then
           echo "PIPELINE_PRIVATE_PEM is not set, will not be able to decode encryption key."
           exit 1
         fi
