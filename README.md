@@ -1,4 +1,4 @@
-# orb-common-pipeline-tasks [![CircleCI status](https://circleci.com/gh/feedyard/orb-common-pipeline-tasks.svg "CircleCI status")](https://circleci.com/gh/feedyard/orb-common-pipeline-tasks) [![CircleCI Orb Version](https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/feedyard/orb-common-pipeline-tasks)](https://circleci.com/orbs/registry/orb/feedyard/orb-common-pipeline-tasks) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/feedyard/orb-common-pipeline-tasks/master/LICENSE)
+# orb-common-pipeline-tasks [![CircleCI status](https://circleci.com/gh/feedyard/orb-common-pipeline-tasks.svg "CircleCI status")](https://circleci.com/gh/feedyard/orb-common-pipeline-tasks) [![CircleCI Orb Version](https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/feedyard/common-pipeline-tasks)](https://circleci.com/orbs/registry/orb/feedyard/common-pipeline-tasks) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/feedyard/orb-common-pipeline-tasks/master/LICENSE)
 
 Set of common pipeline tasks
 
