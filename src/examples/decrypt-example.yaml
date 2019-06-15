@@ -44,6 +44,6 @@ usage:
     pipeline:
       jobs:
         - common-tasks/decrypt-file:
-            private-key: PIPELINE_PRIVATE_PEM   # perhaps pulled from Vault
+            private-pem: PIPELINE_PRIVATE_PEM   # perhaps pulled from Vault
             stored-key: filename.bin
-            decoded-file: filename.bin
+            encoded-file: filename.bin
