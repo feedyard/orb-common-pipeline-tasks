@@ -15,7 +15,7 @@ parameters:
       filename of the file containing the key used to encrypt the encoded file. This key value was encrypted
       using the public key of the rsa used by a pipeline for managing encrypted information stored in a repo.
     type: string
-    default: key.bin
+    default: .key.bin
 
   encoded-file:
     description: filename of encoded file to be decrypted
@@ -32,8 +32,8 @@ steps:
   - run:
       name: check sha256sum for encoded key and encoded file
       command: |
-        sha256sum --check --status << parameters.stored-key >>.enc.sha
-        sha256sum --check --status << parameters.encoded-file >>.enc.sha
+        sha256sum -c -s << parameters.stored-key >>.enc.sha
+        sha256sum -c -s << parameters.encoded-file >>.enc.sha
   - run:
       name: decode local encryption key using pipeline private.pem
       command: |
