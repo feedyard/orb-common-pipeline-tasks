@@ -32,18 +32,18 @@ steps:
   - run:
       name: check sha256sum for encoded key and encoded file
       command: |
-        sha256sum -c -s << parameters.stored-key >>.enc.sha
-        sha256sum -c -s << parameters.encoded-file >>.enc.sha
+        sha256sum -c -s ./<< parameters.stored-key >>.enc.sha
+        sha256sum -c -s ./<< parameters.encoded-file >>.enc.sha
   - run:
       name: decode local encryption key using pipeline private.pem
       command: |
         openssl rsautl -decrypt -inkey << parameters.private-pem >> \
-                -in << parameters.stored-key >>.enc \
-                -out << parameters.stored-key >>
+                -in ./<< parameters.stored-key >>.enc \
+                -out ./<< parameters.stored-key >>
   - run:
       name: decode local file using local encryption key
       command: |
         openssl enc -d -aes-256-cbc \
-                -in << parameters.encoded-file >>.enc \
-                -out << parameters.encoded-file >> \
+                -in ./<< parameters.encoded-file >>.enc \
+                -out ./<< parameters.encoded-file >> \
                 -pass file:./<< parameters.stored-key >>
