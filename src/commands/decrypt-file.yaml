@@ -32,7 +32,7 @@ steps:
   - run:
       name: check sha256sum for encoded key and encoded file
       command: |
-        ls -la
+        echo << parameters.stored-key >>
         sha256sum -c -s << parameters.stored-key >>.enc.sha
         sha256sum -c -s << parameters.encoded-file >>.enc.sha
   - run:
