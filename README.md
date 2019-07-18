@@ -7,6 +7,50 @@ Set of common pipeline tasks
 
 See orb registry help and examples pages for use descriptions
 
+### working with gnupg to create and use public and private keys
+
+Generate new gpg RSA key from template (quiet)
+```bash
+$ cat > foo <<EOF
+     %echo Generating a basic OpenPGP key
+     Key-Type: RSA
+     Key-Length: 4096
+     Name-Real: pipeline-key
+     Name-Comment: with no passphrase
+     Name-Email: service.account@foo.bar
+     Expire-Date: 0
+     # Do a commit here, so that we can later print "done" :-)
+     %commit
+     %echo done
+EOF
+$ gpg --batch --generate-key foo
+$ gpg --armor --export pipeline-key > public.asc
+```
+
+Export the private key
+```bash
+$ gpg --export-secret-keys --armor pipeline-key > private.asc
+```
+
+Import a public key and encrypt local file using public key
+```bash
+$ gpg --import public.asc
+$ gpg --recipient pipeline-key --encrypt FILENAME
+```
+
+Import a private key and decode file encrypted with public key
+```bash
+$ gpg --import private.asc
+$ gpg --decrypt FILENAME.gpg > FILENAME
+```
+
+The common-pipeline-tasks orb expects the private.asc to be available in base64 encoded format in an Environment variable.
+Use circleci api to upload the private key to a Context or do the following to copy the private key and paste into the
+teams circleci 'context' environment variable.
+```bash
+$ cat private.asc | base64 | pbcopy
+```
+
 ### working with openssl to create and use public and private keys
 
 Generate new RSA key and encrypt with a pass phrase based on AES CBC 256
@@ -31,7 +75,7 @@ $ openssl rand -base64 32 > key.bin
 
 Encrypt file using local encryption key
 ```bash
-$ openssl enc -aes-256-cbc -salt -in FILENAME -out FILENAME.enc -pass file:./key.bin
+$ openssl enc -aes-256-cbc -md sha512 -salt -in FILENAME -out FILENAME.enc -pass file:./key.bin
 ```
 
 Encrypt the local random encryption key using the public key
@@ -46,5 +90,5 @@ $ openssl rsautl -decrypt -inkey private.pem -in key.bin.enc -out key.bin
 
 Decrypt a file using the local encryption key
 ```bash
-$ openssl enc -d -aes-256-cbc -in FILENAME.enc -out FILENAME -pass file:./key.bin
+$ openssl enc -d -aes-256-cbc -md sha512 -in FILENAME.enc -out FILENAME -pass file:./key.bin
 ```

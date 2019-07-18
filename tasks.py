@@ -31,3 +31,9 @@ def validate(ctx):
     ctx.run('circleci config pack src > orb.yml')
     ctx.run('circleci orb validate orb.yml')
     ctx.run('rm orb.yml')
+
+@task
+def dev(ctx):
+    ctx.run('circleci config pack src > orb.yml')
+    ctx.run('circleci orb validate orb.yml')
+    ctx.run('circleci orb publish orb.yml feedyard/common-pipeline-tasks@dev:latest')

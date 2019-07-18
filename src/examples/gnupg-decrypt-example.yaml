@@ -1,0 +1,42 @@
+description: >
+  An RSA key is created for use by the pipeline in working with encrypted files. The public key can be distributed to
+  pipeline users for file encryption. At runtime, the pipeline will use the private key to decrypt the encoded files.
+
+  Encode files using gnupg and the public key. Sha256sum must be included for encrypted files and will be checked by
+  the orb logic.
+
+  Put the unencoded filename or a common .extension into .gitignore so the plaintext contents of the files to be encoded
+  is never added to the repository. This orb makes use of the assumed convention that decoded files intended to be kept
+  secure will have the extension .bin and once encoded will gain the addition extension .enc, as in filename.bin.enc
+  Similarly, the sha256sum will be filename.bin.enc.sha
+
+  The common-pipeline-tasks orb expects the private key to be available in base64 encoded format in an Environment variable.
+  Use circleci api to upload the private key to a Context or do the following to copy the private key and paste into the
+  teams circleci 'context' environment variable.
+  ```bash
+  $ cat private.asc | base64 | pbcopy
+  ```
+
+  Assuming the Name-Real of the public key is pipeline-key and is distributed with the filename public.asc, import the
+  public key and encrypt local files as follows:
+
+  ```bash
+  $ gpg --import public.asc
+  $ gpg --recipient pipeline-key --encrypt FILENAME
+  ```
+  See orb github repo for additional information on working with gnupg.
+  https://github.com/feedyard/orb-common-pipeline-tasks
+
+usage:
+  version: 2.1
+
+  orbs:
+    common-tasks: feedyard/common-pipeline-tasks@0.3.0
+
+  workflows:
+    pipeline:
+      jobs:
+        - common-tasks/decrypt-file:
+            private-pem: PIPELINE_PRIVATE_PEM
+            stored-key: filename.bin
+            encoded-file: filename.bin

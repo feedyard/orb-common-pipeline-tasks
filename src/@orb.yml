@@ -2,6 +2,6 @@
 version: 2.1
 
 description: |
-  Feedyard common-pipeline-tasks is an example set of shared commands and jobs that team(s) would use to
+  Feedyard common-pipeline-tasks is an example set of shared commands and jobs that dev team(s) use to
   standardize basic team practices or conventions.
   Orb source code - https://github.com/feedyard/orb-common-pipeline-tasks

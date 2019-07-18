@@ -1,16 +1,26 @@
 description: >
   A public/private rsa key is created for use by the pipeline in working with encrypted files. Encoded files are
-  encrypted using openssl enc and a sufficient long random key. This random key is then encrypted with the pipeline's
+  encrypted using openssl enc and a sufficiently long random key. This random key is then encrypted with the pipeline's
   public key and stored in the repo alongside the encrypted file. During pipeline execution, the pipeline will use the
-  private key to decrypt the stored encryption key and then use this to decrypt encoded files. Sha256sum should be
+  private key to decrypt the stored encryption key and then use this to decrypt encoded files. Sha256sum must be
   included for encrypted files and will be checked by the orb logic.
 
   Put the filename or a common .extension into .gitignore so the the plaintext contents of the files to be encoded is
   never added to the repository. This orb makes use of the assumed convention that decoded files intended to be kept
-  secure will have the extension .bin and once encoded will gain the addition extension .enc, as in filename.bin.enc -
-  Similarly, the local random encryption key will be named key.bin and the version encrypted with the public key will
-  be key.bin.enc - You could easily adapt this example to a different convention or modify to require explicit passing
-  of key and filenames.
+  secure will have the extension .bin and once encoded will gain the addition extension .enc, as in filename.bin.enc
+  The sha256sum should be named filename.bin.enc.sha - Similarly, the local random encryption key will be named key.bin
+  and the version encrypted with the public key will be key.bin.enc, with a key.bin.enc.sha -
+  You could easily adapt this example to a different convention or modify to require explicit passing of key.
+
+  The common-pipeline-tasks orb expects the private.asc to be available in base64 encoded format in an Environment variable.
+  Use circleci api to upload the private key to a Context or do the following to copy the private key and paste into the
+  teams circleci 'context' environment variable.
+  ```bash
+  $ cat private.asc | base64 | pbcopy
+  ```
+
+  See orb github repo for additional information on working with openssl.
+  https://github.com/feedyard/orb-common-pipeline-tasks
 
   The following tasks.py can be added locally to make working with these keys easier.
 
@@ -44,6 +54,6 @@ usage:
     pipeline:
       jobs:
         - common-tasks/decrypt-file:
-            private-pem: PIPELINE_PRIVATE_PEM   # perhaps pulled from Vault
+            private-pem: $PIPELINE_PRIVATE_PEM
             stored-key: filename.bin
             encoded-file: filename.bin

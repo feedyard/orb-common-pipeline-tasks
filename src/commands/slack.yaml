@@ -1,6 +1,6 @@
 # src/commands/slack.yaml
 
-description: Post simple message to slack webhook
+description: Post simple message to slack webhook url
 
 parameters:
 
@@ -15,13 +15,13 @@ parameters:
 
   webhook:
     description: Webhook value
-    type: env_var_name
+    type: string
 
 steps:
   - run:
       name: Confirm slack webhook environment variable is configured
       command: |
-        if [ ! ${<< parameters.webhook >>-} ]; then
+        if [ ! << parameters.webhook >>- ]; then
           echo "Slack webhook is not set, will not be able to access Slack api."
           exit 1
         fi
@@ -38,4 +38,4 @@ steps:
                   \"title\": \"<< parameters.title >>\", \
                 } \
               ] \
-            }" ${<< parameters.webhook >>}
+            }" << parameters.webhook >>

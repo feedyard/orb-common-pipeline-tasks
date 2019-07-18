@@ -13,4 +13,4 @@ usage:
         - common-tasks/slack:
             title: CircleCi
             message: Job approval is pending for $CIRCLE_PROJECT_REPONAME
-            webhook: https://hooks.slack.com/services/THX1139/BR549/LOkiWW456h53w123456789
+            webhook: $SLACKHOOKURL  # e.g., https://hooks.slack.com/services/123abc

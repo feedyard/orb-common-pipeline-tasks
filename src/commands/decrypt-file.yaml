@@ -1,50 +1,74 @@
 # src/commands/decrypt-file.yaml
 
 description: >
-  Use this command to decrypt a local file using openssl aes-256-cbc key encryption. A typical use case would be in
-  maintaining secure information in a code repository for use in a ci/cd pipeline. See orb examples for use.
+  Use this command to decrypt a local file using either the default gnupg public/private key pair asymmetric encryption
+  or an alternative combination asymmetrics/symmetric process using openssl aes-256-cbc key encryption. A typical use
+  case would be in maintaining secure information in a code repository for use in a ci/cd pipeline.
+  See orb examples for use.
 
 parameters:
-  private-pem:
-    description: public key of the rsa used by a pipeline for managing encrypted information stored in a repo
-    type: env_var_name
-    default: PIPELINE_PRIVATE_PEM
+  private-key:
+    description: private key of the rsa used by a pipeline for managing encrypted information stored in a repo
+    type: string
+    default: $PIPELINE_PRIVATE_ASC
 
   stored-key:
     description: >
       filename of the file containing the key used to encrypt the encoded file. This key value was encrypted
       using the public key of the rsa used by a pipeline for managing encrypted information stored in a repo.
     type: string
-    default: ".key.bin"
+    default: 'key.bin'
 
   encoded-file:
     description: filename of encoded file to be decrypted
     type: string
 
+  use-openssl:
+    description: Use alternate openssl file encryption method. See discussion in example for differences with default.
+    type: boolean
+    default: false
+
 steps:
   - run:
-      name: Confirm PIPELINE_PRIVATE_PEM environment variable is configured
+      name: Confirm PIPELINE_PRIVATE_ASC environment variable is configured
       command: |
-        if [ ! ${<< parameters.private-pem >>-} ]; then
-          echo "PIPELINE_PRIVATE_PEM is not set, will not be able to decode encryption key."
+        if [ ! << parameters.private-key >>- ]; then
+          echo "PIPELINE_PRIVATE_ASC is not set, will not be able to decode encryption key."
           exit 1
         fi
   - run:
-      name: check sha256sum for encoded key and encoded file
+      name: check sha256sum for encoded file
       command: |
-        echo << parameters.stored-key >>
-        sha256sum -c -s << parameters.stored-key >>.enc.sha
         sha256sum -c -s << parameters.encoded-file >>.enc.sha
-  - run:
-      name: decode local encryption key using pipeline private.pem
-      command: |
-        openssl rsautl -decrypt -inkey << parameters.private-pem >> \
-                -in ./<< parameters.stored-key >>.enc \
-                -out ./<< parameters.stored-key >>
-  - run:
-      name: decode local file using local encryption key
-      command: |
-        openssl enc -d -aes-256-cbc \
-                -in ./<< parameters.encoded-file >>.enc \
-                -out ./<< parameters.encoded-file >> \
-                -pass file:./<< parameters.stored-key >>
+  - when:
+      condition: << parameters.use-openssl >>
+      steps:
+        - run:
+            name: openssl symmetric. import private key.
+            command: |
+              echo << parameters.private-key >> | base64 -d > private.pem
+        - run:
+            name: openssl asymmetric. decode local encryption key using pipeline private key
+            command: |
+              sha256sum -c -s << parameters.stored-key >>.enc.sha
+              openssl rsautl -decrypt -inkey private.pem \
+                      -in << parameters.stored-key >>.enc \
+                      -out << parameters.stored-key >>
+        - run:
+            name: openssl symmetric. decode local file using local encryption key
+            command: |
+              openssl enc -d -aes-256-cbc -md sha512 \
+                      -in << parameters.encoded-file >>.enc \
+                      -out << parameters.encoded-file >> \
+                      -pass file:./<< parameters.stored-key >>
+  - unless:
+      condition: << parameters.use-openssl >>
+      steps:
+        - run:
+            name: gnupg asymmetric. import private key
+            command: |
+              echo -e << parameters.private-key >> | base64 -d | gpg --import
+        - run:
+            name: gnupg asymmetric. decode local file
+            command: |
+              gpg --decrypt << parameters.encoded-file >>.enc >> << parameters.encoded-file >>
